@@ -6,7 +6,7 @@ library(ggmap)
 
 rm(list=ls())
 
-city.info <- data.frame(name = c('austin', 'sandiego', 'berlin', 'milano'))
+city.info <- data.frame(name = c('austin', 'sandiego', 'berlin', 'milano', 'torino', 'miami', 'firenze', 'hamburg'))
 
 car.df <- data.frame()
 
@@ -52,10 +52,19 @@ for (city in city.info$name){
 car.df$fuel <- as.numeric(as.character(car.df$fuel))
 write.csv(car.df, file = 'car2go.csv')
 
-map <- get_map(location = 'milan', zoom = 11)
+map <- get_map(location = 'miami', zoom = 12)
 ggmap(map)+ geom_point(aes(x = Longitude, y = Latitude, color = fuel, size = 2), data = car.df)+scale_colour_gradient2(low = 'red', high = 'green', midpoint = 60, mid = 'yellow')
 
+car.status.city <- data.frame(City = city.info$name, cleanness = NA, fuel = NA)
+
+for (city in city.info$name){
+  
+  car.status.city[car.status.city$City == city, ]$cleanness <- 1-sum(car.df[car.df$City == city,]$interior != 'GOOD')/nrow(car.df[car.df$City == city,])
+  car.status.city[car.status.city$City == city, ]$fuel <- mean(car.df[car.df$City == city,]$fuel)
+}
 
 
+ggplot(data = car.status.city, aes(x=City, y=cleanness, fill = cleanness)) + geom_bar(stat="identity")
 
+ggplot(data = car.status.city, aes(x=cleanness, y=fuel, color=City)) + geom_point()
 
