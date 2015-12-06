@@ -6,11 +6,11 @@ library(ggmap)
 
 rm(list=ls())
 
-city.info <- data.frame(name = c('austin', 'sandiego', 'berlin', 'milano', 'torino', 'miami', 'firenze', 'hamburg'))
+city.info <- read.csv('cities.csv', header = T)
 
 car.df <- data.frame()
 
-for (city in city.info$name){
+for (city in city.info$City){
   car2goURL <- paste('https://www.car2go.com/api/v2.1/vehicles?loc=', city, '&oauth_consumer_key=car2gowebsite&format=json', sep = '' )
 
   #import from JSON
@@ -52,19 +52,19 @@ for (city in city.info$name){
 car.df$fuel <- as.numeric(as.character(car.df$fuel))
 write.csv(car.df, file = 'car2go.csv')
 
-map <- get_map(location = 'miami', zoom = 12)
+map <- get_map(location = 'wien', zoom = 11)
 ggmap(map)+ geom_point(aes(x = Longitude, y = Latitude, color = fuel, size = 2), data = car.df)+scale_colour_gradient2(low = 'red', high = 'green', midpoint = 60, mid = 'yellow')
 
-car.status.city <- data.frame(City = city.info$name, cleanness = NA, fuel = NA)
+car.status.city <- data.frame(City = city.info$City, cleanness = NA, fuel = NA)
 
-for (city in city.info$name){
+for (city in city.info$City){
   
   car.status.city[car.status.city$City == city, ]$cleanness <- 1-sum(car.df[car.df$City == city,]$interior != 'GOOD')/nrow(car.df[car.df$City == city,])
   car.status.city[car.status.city$City == city, ]$fuel <- mean(car.df[car.df$City == city,]$fuel)
 }
 
 
-ggplot(data = car.status.city, aes(x=City, y=cleanness, fill = cleanness)) + geom_bar(stat="identity")
+ggplot(data = car.status.city, aes(x=City, y=cleanness, fill = cleanness)) + geom_bar(stat="identity") +coord_flip()
 
-ggplot(data = car.status.city, aes(x=cleanness, y=fuel, color=City)) + geom_point()
+ggplot(data = car.status.city ) + geom_point(aes(x=cleanness, y=fuel, color=City, size = 2))
 
