@@ -20,7 +20,7 @@ car.df <- cbind(car.df, coord)
 
 colnames(car.df) <- c(colnames(car2goData[[1]])[1:2],colnames(car2goData[[1]])[4:10], 'Longitude', 'Latitude', 'Altitude')
 head(car.df)
-write.csv(car.df, file = 'car2go.csv')
+write.csv(car.df, file = 'car2goSanDiego.csv')
 
 car.df$fuel <- as.numeric(as.character(car.df$fuel))
 
