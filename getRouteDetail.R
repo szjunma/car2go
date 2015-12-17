@@ -4,19 +4,19 @@ library(ggplot2)
 library(ggmap)
 library(dplyr)
 
-source('decodeLine.R')
-
 setwd("C:/Users/Jun/Dropbox/Data project/car2go")
+source('decodeLine.R')
+source('init.R')
+
+
 rm(list=ls())
 
 time.df <- read.csv('1Timedcar2go_week.csv', header = T)
 
 car.first.app <- subset(time.df, !duplicated(time.df[, c(-1,-15)], fromLast = F))
-
 car.first.app <- car.first.app[duplicated(car.first.app[, 8]) | duplicated(car.first.app[, 8], fromLast = T),]
 
 car.last.app <- subset(time.df, !duplicated(time.df[, c(-1,-15)], fromLast = T))
-
 car.last.app <- car.last.app[duplicated(car.last.app[, 8]) | duplicated(car.last.app[, 8], fromLast = T),]
 
 A <- rbind(car.first.app, car.last.app)
@@ -57,51 +57,60 @@ for (name in car.name){
   
 }
 
+#trip time in mins
 trip.info$Time <- round(trip.info$Time-5,0)
+
+#convert to miles
 trip.info <- mutate(trip.info, miles = Dist/1609)
+
+#convert to time format
 trip.info$startTime <- strptime(trip.info$startTime, "%Y-%m-%d %H:%M:%S")
 
 car.route.sub <- filter(car.route, name %in% car.name)
 car.app.sub <- filter(car.first.app, name %in% car.name)
 
 
-
-map <- get_map(location = 'austin', zoom = 13)
-plot.route <- ggmap(map) + geom_path(aes(x = lon, y = lat, color = name), size = 1, data = car.route.sub, lineend = 'butt') + 
-  geom_point(aes(x = Longitude, y = Latitude, color = name), data = car.app.sub, size =3)+ 
-  theme(legend.position="none")
-plot.route
-
-
-map <- get_map(location = 'austin', zoom = 11)
-plot.route <- ggmap(map) + 
-  geom_path(aes(x = lon, y = lat, color = name), size = 1, data = route_df, lineend = 'round') + 
-#   geom_point(aes(x = Longitude, y = Latitude, color = name), data = car.first.app, size =3)+ 
-  theme(legend.position="none")
-
-plot.route
-
-plot.dist <-ggplot(data=trip.info, aes(trip.info$miles)) + 
+trip.info <- read.csv('data/Mondaytrip.csv', header = T)
+#plot trip info
+plot.dist <- ggplot(data=trip.info, aes(trip.info$miles)) + 
   geom_histogram(aes(fill = ..count..), breaks=seq(0, 15, by = 1) ) + 
-  labs(title="Histogram for distance") +
-  labs(x="Distance (miles)", y="Count")
+  title_with_subtitle("Travel Distance of Each Trip", 'Monday 12/07/2015') +
+  labs(x="Distance (miles)", y="Count") +
+  theme_tws(base_size = 20) + theme(legend.position=c(0.9, 0.5))
 
-plot.dist
+png('plots/dist.png', width=640, height=480)
 
-plot.time <-ggplot(data=trip.info, aes(trip.info$Time)) + 
+print(plot.dist)
+
+dev.off()
+
+
+plot.time <- ggplot(data=trip.info, aes(trip.info$Time)) + 
   geom_histogram(aes(fill = ..count..), binwidth = 5, breaks=seq(0, 150, by = 5)) + 
-  labs(title="Histogram for time") +
-  labs(x="Time (minutes)", y="Count")
+  title_with_subtitle("Travel Time of Each Trip", 'Monday 12/07/2015') +
+  labs(x="Time (minutes)", y="Count") +
+  theme_tws(base_size = 20) + theme(legend.position=c(0.9, 0.5))
 
-plot.time
+png('plots/time.png', width=640, height=480)
 
-ggplot(trip.info, aes(x=startTime)) + geom_histogram(aes(fill = ..count..),binwidth=1200) +
-  labs(title="Number of trips during a day") +
-  labs(x="Start time", y="Count")
+print(plot.time)
 
-
+dev.off()
 
 
-write.csv(car.route, file = 'Mondayroute.csv')
-write.csv(trip.info, file = 'Mondaytrip.csv')
+plot.start <- ggplot(trip.info, aes(x=startTime)) + geom_histogram(aes(fill = ..count..),binwidth=1200) +
+  title_with_subtitle("Number of Trips", 'Monday 12/07/2015') +
+  labs(x="Start time", y="Count") +
+  theme_tws(base_size = 20) + theme(legend.position=c(0.5, 0.7))
+
+png('plots/start.png', width=640, height=480)
+
+print(plot.start)
+
+dev.off()
+
+
+#output files
+write.csv(car.route, file = 'data/Mondayroute.csv')
+write.csv(trip.info, file = 'data/Mondaytrip.csv')
 
