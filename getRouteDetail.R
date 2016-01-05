@@ -4,12 +4,8 @@ library(ggplot2)
 library(ggmap)
 library(dplyr)
 
-setwd("C:/Users/Jun/Dropbox/Data project/car2go")
 source('decodeLine.R')
 source('init.R')
-
-
-rm(list=ls())
 
 time.df <- read.csv('1Timedcar2go_week.csv', header = T)
 

@@ -60,7 +60,7 @@ for (day in 1:7){
   
   
   car.df.time$fuel <- as.numeric(as.character(car.df.time$fuel))
-  write.csv(car.df.time, file = paste(day, 'data/Timedcar2go_week.csv', sep = ''))
+  write.csv(car.df.time, file = paste('data/', day, '_Timedcar2go_week.csv', sep = ''))
   
 }
 
