@@ -7,7 +7,7 @@ library(dplyr)
 source('decodeLine.R')
 source('init.R')
 
-time.df <- read.csv('1Timedcar2go_week.csv', header = T)
+time.df <- read.csv('data/1Timedcar2go_week.csv', header = T)
 
 car.first.app <- subset(time.df, !duplicated(time.df[, c(-1,-15)], fromLast = F))
 car.first.app <- car.first.app[duplicated(car.first.app[, 8]) | duplicated(car.first.app[, 8], fromLast = T),]
@@ -38,7 +38,7 @@ for (name in car.name){
     
     car.route.temp <- decodeLine( car.route.all$routes[[1]]$overview_polyline$points )
   
-    car.route.single <- rbind(car.route.single, car.route.temp)
+    car.route.single <- rbind(car.route.single, data.frame(car.route.temp, startTime = car.single.last$Time....Sys.time..[trip.ct]))
     
     trip.single.temp <- data.frame(name = name, Dist = car.route.all$routes[[1]]$legs[[1]]$distance$value, 
                                    Fuel = car.single$fuel[trip.ct]-car.single$fuel[trip.ct+1], 

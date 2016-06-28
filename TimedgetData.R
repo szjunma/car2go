@@ -1,22 +1,24 @@
 #include jsonlite
 library(jsonlite)
+city.info <- read.csv('data/cities.csv', header = T)
 
-for (day in 1:7){
+
+for (day in 1:100){
 
   car.df.time <- data.frame()
   
   for (i in seq(1,288)){
     rm(car.df)
   
-    city.info <- read.csv('data/cities.csv', header = T)
-    
     car.df <- data.frame()
     
     for (city in city.info$City[1]){
       car2goURL <- paste('https://www.car2go.com/api/v2.1/vehicles?loc=', city, '&oauth_consumer_key=car2gowebsite&format=json', sep = '' )
     
       #import from JSON
-      car2goData <- fromJSON(txt = car2goURL)
+      tryCatch({
+        car2goData <- fromJSON(txt = car2goURL)
+      }, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
       
       #identify vehicles having charging attibutes or not
       if (length(colnames(car2goData[[1]])) == 10){
@@ -57,7 +59,6 @@ for (day in 1:7){
     Sys.sleep(299)
     
   }
-  
   
   car.df.time$fuel <- as.numeric(as.character(car.df.time$fuel))
   write.csv(car.df.time, file = paste('data/', day, '_Timedcar2go_week.csv', sep = ''))
